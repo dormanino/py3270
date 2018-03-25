@@ -306,6 +306,25 @@ class Emulator(object):
 
         return c
 
+    def exec_command_EBCDIC(self, cmdstr):
+        """
+            Execute an x3270 command
+
+            `cmdstr` gets sent directly to the x3270 subprocess on it's stdin.
+        """
+        if self.is_terminated:
+            raise TerminatedError('this TerminalClient instance has been terminated')
+
+        log.debug('sending command: %s', cmdstr)
+        c = Command(self.app, cmdstr)
+        start = time.time()
+        c.execute()
+        elapsed = time.time() - start
+        log.debug('elapsed execution: {0}'.format(elapsed))
+        self.status = Status(c.status_line)
+
+        return c
+
     def terminate(self):
         """
             terminates the underlying x3270 subprocess. Once called, this
@@ -424,7 +443,7 @@ class Emulator(object):
     def send_pf8(self):
         self.exec_command(b'PF(8)')
 
-    def send_pf208(self):
+    def send_pf20(self):
         self.exec_command(b'PF(20)')
 
     def send_pf(self, value):
